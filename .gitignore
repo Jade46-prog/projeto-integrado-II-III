@@ -1,0 +1,7 @@
+# Backups incluem CPFs e senhas; não publicar no repositório.
+backup-*.json
+backups/
+*.zip
+.env
+.env.*
+node_modules/
