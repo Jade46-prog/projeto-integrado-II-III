@@ -50,9 +50,11 @@ $env:E2E_ADMIN_PASSWORD='Senha-do-admin-de-testes-123!'
 npm run test:e2e
 ```
 
-O Playwright inicia o Vite na porta 5173, acessa a API configurada e cria cadastros identificados com um sufixo exclusivo. Deixe essa porta livre. Os três testes cobrem:
+O Playwright inicia o Vite na porta 5173, acessa a API configurada e cria cadastros identificados com um sufixo exclusivo. Deixe essa porta livre. Se sua aplicação já estiver aberta nela, use `$env:E2E_FRONTEND_PORT='5183'` no terminal dos testes e configure `$env:CORS_ORIGINS='http://localhost:5183,http://127.0.0.1:5183'` antes de iniciar a API isolada. O servidor aberto pelo usuário não é reutilizado nem encerrado pelos testes.
 
-- Cadastros administrativos, edição de matéria por curso, máscara de horário, série semanal, edição de todas as ocorrências, publicação, cancelamento pelo professor, consulta anônima, notificações e exclusão da série.
+O fluxo principal fixa somente o relógio do navegador em 08/12/2026 para conferir notificações da semana com as aulas de teste de dezembro, independentemente da data de execução. Os três testes cobrem:
+
+- Cadastros administrativos, seleção de andar, edição de matéria por curso, máscara de horário, calendário em português e datas brasileiras, disponibilidade de sala, série semanal, edição de todas as ocorrências, publicação, lista compacta e cancelamento pelo professor, seleção explícita de curso/semestre/período pelo aluno, consulta mensal, notificações semanais e exclusão da série.
 - Importação pela interface, incluindo prévia, invalidação após alteração, confirmação e remoção de senhas antigas antes do envio.
 - Consulta do aluno em uma tela de celular de 390 × 844 pixels, sem rolagem horizontal da página.
 

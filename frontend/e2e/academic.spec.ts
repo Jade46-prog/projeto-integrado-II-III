@@ -16,6 +16,7 @@ async function login(page: Page, cpf: string, pass: string) {
   await page.getByRole('button', { name: 'Entrar no Sistema', exact: true }).click();
 }
 test('cadastros, séries, publicação, professor e aluno pela interface', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-12-08T12:00:00-03:00'));
   const suffix = crypto.randomUUID().slice(0, 7).toUpperCase(),
     code = 'E' + suffix,
     course = 'Curso E2E ' + suffix,
@@ -60,7 +61,7 @@ test('cadastros, séries, publicação, professor e aluno pela interface', async
   await page.getByRole('button', { name: 'Cadastrar sala', exact: true }).click();
   dialog = page.getByRole('dialog');
   await dialog.getByLabel('Nome', { exact: true }).fill('Sala ' + suffix);
-  await dialog.getByLabel('Andar / tipo de espaço').fill('1');
+  await dialog.getByLabel('Andar / tipo de espaço').selectOption('1º andar');
   await dialog.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(dialog).not.toBeVisible();
   await page
@@ -91,11 +92,16 @@ test('cadastros, séries, publicação, professor e aluno pela interface', async
   await expect(dialog.getByLabel('Horário de início')).toHaveValue('19:00');
   await dialog.getByLabel('Horário de término').fill('2000');
   await dialog.getByLabel(`${code}-1A (1º sem.)`, { exact: true }).check();
-  await dialog.getByLabel('Data da aula').fill('2026-12-07');
+  await dialog.getByLabel('Data da aula').fill('07/12/2026');
+  await dialog.getByRole('button', { name: 'Escolher data no calendário' }).click();
+  const calendar = page.getByRole('dialog', { name: 'dezembro de 2026' });
+  await expect(calendar).toContainText('Seg');
+  await calendar.getByRole('button', { name: '07/12/2026' }).click();
   await page.screenshot({ path: 'test-results/lesson-dialog.png' });
   await dialog.getByLabel('Repetir toda semana até o fim do semestre').check();
-  await dialog.getByLabel('Andar / tipo de espaço').selectOption('1');
-  await dialog.getByLabel('Sala', { exact: true }).selectOption({ label: 'Sala ' + suffix });
+  await dialog.getByLabel('Andar / tipo de espaço').selectOption('1º andar');
+  await expect(dialog.getByLabel('Sala', { exact: true }).locator('option').filter({ hasText: 'Sala ' + suffix })).toHaveText('Sala ' + suffix + ' — Disponível');
+  await dialog.getByLabel('Sala', { exact: true }).selectOption({ label: 'Sala ' + suffix + ' — Disponível' });
   await dialog.getByRole('button', { name: 'Salvar Aula', exact: true }).click();
   await expect(dialog).not.toBeVisible();
   await expect(page.locator('article.lesson')).toHaveCount(2);
@@ -108,7 +114,7 @@ test('cadastros, séries, publicação, professor e aluno pela interface', async
   await dialog.getByLabel('Aplicar alterações em').selectOption('series');
   await expect(dialog.getByLabel('Repetir toda semana até o fim do semestre')).toBeDisabled();
   await dialog.getByLabel('Horário de término').fill('2030');
-  await dialog.getByLabel('Data da aula').fill('2026-12-08');
+  await dialog.getByLabel('Data da aula').fill('08/12/2026');
   page.once('dialog', (d) => void d.accept());
   await dialog.getByRole('button', { name: 'Salvar Aula', exact: true }).click();
   await expect(dialog).not.toBeVisible();
@@ -118,9 +124,9 @@ test('cadastros, séries, publicação, professor e aluno pela interface', async
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await login(page, profCpf, password);
   await page.getByRole('button', { name: 'Semestre inteiro', exact: true }).click();
-  await expect(page.locator('article.lesson')).toHaveCount(2);
+  await expect(page.locator('tbody tr[data-week]')).toHaveCount(2);
   await page
-    .locator('article.lesson')
+    .locator('tbody tr[data-week]')
     .first()
     .getByRole('button', { name: 'Alterar aula' })
     .click();
@@ -128,7 +134,7 @@ test('cadastros, séries, publicação, professor e aluno pela interface', async
   await dialog.getByLabel('Situação').selectOption('CANCELLED');
   await dialog.getByRole('button', { name: 'Salvar alterações', exact: true }).click();
   await expect(dialog).not.toBeVisible();
-  await expect(page.locator('article.lesson').filter({ hasText: 'Cancelada' })).toHaveCount(1);
+  await expect(page.locator('tbody tr[data-week]').filter({ hasText: 'Cancelada' })).toHaveCount(1);
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await page.getByRole('link', { name: 'Entrar como aluno' }).click();
   await expect(page.getByLabel('Curso', { exact: true })).toHaveValue('');
@@ -136,6 +142,12 @@ test('cadastros, séries, publicação, professor e aluno pela interface', async
   await page.getByLabel('Curso', { exact: true }).selectOption({ label: course });
   await expect(page.getByLabel('Semestre', { exact: true })).toHaveValue('');
   await page.getByLabel('Semestre', { exact: true }).selectOption('1');
+  await expect(page.getByLabel('Período', { exact: true })).toHaveValue('');
+  await page.getByLabel('Período', { exact: true }).selectOption('NOTURNO');
+  await expect(page.locator('article.lesson')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Mês', exact: true }).click();
+  await page.getByLabel('Selecionar mês').selectOption('2026-12');
+  await expect(page.locator('article.lesson')).toHaveCount(2);
   await page.getByRole('button', { name: /Notificações/ }).click();
   await expect(page.getByRole('dialog')).toContainText(subject);
   await page.getByRole('button', { name: 'Fechar', exact: true }).click();
