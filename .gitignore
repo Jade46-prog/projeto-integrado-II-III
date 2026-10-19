@@ -5,3 +5,16 @@ backups/
 .env
 .env.*
 node_modules/
+.tools/
+frontend/dist/
+frontend/playwright-report/
+frontend/test-results/
+frontend/*.tsbuildinfo
+!frontend/.env.example
+!backend/.env.example
+backend/target/
+backend/.test-postgres/
+backend/.maven-cache/
+debug.log
+backend/erro.txt
+*.log
