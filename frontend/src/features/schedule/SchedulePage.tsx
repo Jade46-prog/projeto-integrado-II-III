@@ -265,7 +265,44 @@ function Schedule({
           )}
         </div>
       </section>
-      <section className="panel space-y-4">
+
+      {student && (
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Acesso rápido">
+          <button
+            type="button"
+            onClick={() => document.getElementById('filtros-grade')?.scrollIntoView({ behavior: 'smooth' })}
+            className="panel cursor-pointer p-5 text-left hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
+          >
+            <span className="text-3xl" aria-hidden="true">📅</span>
+            <h2 className="mt-2 font-semibold">Minha Grade</h2>
+            <p className="text-sm text-gray-500">Consulte suas aulas e horários.</p>
+          </button>
+          <button
+            type="button"
+            onClick={() => document.getElementById('filtros-grade')?.scrollIntoView({ behavior: 'smooth' })}
+            className="panel cursor-pointer p-5 text-left hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
+          >
+            <span className="text-3xl" aria-hidden="true">🏫</span>
+            <h2 className="mt-2 font-semibold">Salas e Laboratórios</h2>
+            <p className="text-sm text-gray-500">Consulte as salas indicadas nas aulas.</p>
+          </button>
+          <button
+            type="button"
+            disabled={!course || !semester}
+            onClick={() => {
+              setNoticesOpen(true);
+              setRead(new Set([...read, ...(notices.data ?? []).map((n) => n.id)]));
+            }}
+            className="panel cursor-pointer p-5 text-left hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <span className="text-3xl" aria-hidden="true">🔔</span>
+            <h2 className="mt-2 font-semibold">Avisos ({unread})</h2>
+            <p className="text-sm text-gray-500">Consulte atualizações da grade.</p>
+          </button>
+        </section>
+      )}
+
+      <section id="filtros-grade" className="panel space-y-4">
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <Field label="Curso">
             <select
